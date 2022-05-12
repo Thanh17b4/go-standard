@@ -30,3 +30,17 @@ func (u *User) List(page int64, limit int64) ([]*model.User, error) {
 	}
 	return users, nil
 }
+
+func (u *User) Create(user model.User) (int64, error) {
+	result, err := u.db.Exec("INSERT INTO `users` (`name`, `email`, `activated`, `banned`, `protected`) VALUES (?, ?, ?, ?, ?)", user.Name, user.Email, user.Activated, user.Banned, user.Protected)
+	if err != nil {
+		return 0, err
+	}
+
+	lastInsertID, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return lastInsertID, nil
+}

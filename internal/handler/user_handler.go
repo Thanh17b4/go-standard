@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-standard/internal/model"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 )
 
 type UserService interface {
 	GetUsers(page int64, limit int64) ([]*model.User, error)
+	CreateUser(u model.User) (int64, error)
 }
 
 type UserHandler struct {
@@ -41,4 +44,25 @@ func (h UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("user: ", user)
 		json.NewEncoder(w).Encode(user)
 	}
+}
+
+func (h UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var user model.User
+	err := json.Unmarshal(reqBody, &user)
+	if err != nil {
+		log.Fatalln("could not Unmarshal body request")
+		return
+	}
+	fmt.Println(user)
+	insertedID, err := h.userService.CreateUser(user)
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"insertedID": insertedID,
+	})
 }
