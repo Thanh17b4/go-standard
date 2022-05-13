@@ -53,3 +53,12 @@ func (u *User) Delete(userID int64) (int64, error) {
 	}
 	return userID, nil
 }
+
+func (u *User) Update(user *model.User) (*model.User, error) {
+	fmt.Println("usersssss: ", user)
+	_, err := u.db.Exec("UPDATE `users` SET `name`= ? , `email`= ?, `address`= ? WHERE `id` = ?", user.Name, user.Email, user.Address, user.ID)
+	if err != nil {
+		fmt.Printf("err:", err.Error())
+	}
+	return user, nil
+}

@@ -27,5 +27,6 @@ func main() {
 	r.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
 	r.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
 	r.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
+	r.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT")
 	log.Fatal(http.ListenAndServe(":5000", r))
 }

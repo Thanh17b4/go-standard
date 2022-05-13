@@ -15,6 +15,7 @@ type UserService interface {
 	GetUsers(page int64, limit int64) ([]*model.User, error)
 	CreateUser(u model.User) (int64, error)
 	DeleteUser(userID int64) (int64, error)
+	UpdateUser(user *model.User) (*model.User, error)
 }
 
 type UserHandler struct {
@@ -80,5 +81,35 @@ func (h UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	deleteId, _ := h.userService.DeleteUser(id)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		" Deleted userID = ": deleteId,
+	})
+}
+
+func (h UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var user *model.User
+	err := json.Unmarshal(reqBody, &user)
+	if err != nil {
+		log.Fatalln("could not Unmarshal body request")
+		return
+	}
+	vars := mux.Vars(r)
+	userId := vars["id"]
+	userID, err := strconv.ParseInt(userId, 10, 64)
+	if err != nil {
+		fmt.Printf("invalid id. ID should be number")
+		return
+	}
+	user.ID = int(userID)
+	fmt.Println(user)
+
+	updateID, err := h.userService.UpdateUser(user)
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"updatedID": updateID,
 	})
 }
