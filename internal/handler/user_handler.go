@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"go-standard/internal/model"
 	"io/ioutil"
 	"log"
@@ -13,6 +14,7 @@ import (
 type UserService interface {
 	GetUsers(page int64, limit int64) ([]*model.User, error)
 	CreateUser(u model.User) (int64, error)
+	DeleteUser(userID int64) (int64, error)
 }
 
 type UserHandler struct {
@@ -64,5 +66,19 @@ func (h UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"insertedID": insertedID,
+	})
+}
+
+func (h UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["id"]
+	id, err := strconv.ParseInt(userId, 10, 64)
+	if err != nil {
+		fmt.Printf("invalid id. ID should be number")
+		return
+	}
+	deleteId, _ := h.userService.DeleteUser(id)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		" Deleted userID = ": deleteId,
 	})
 }

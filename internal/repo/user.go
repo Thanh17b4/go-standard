@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 	"go-standard/internal/model"
 )
 
@@ -43,4 +44,12 @@ func (u *User) Create(user model.User) (int64, error) {
 	}
 
 	return lastInsertID, nil
+}
+
+func (u *User) Delete(userID int64) (int64, error) {
+	_, err := u.db.Exec(" DELETE FROM `users` WHERE `id`=?", userID)
+	if err != nil {
+		fmt.Println(" err: ", err.Error())
+	}
+	return userID, nil
 }

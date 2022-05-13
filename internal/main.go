@@ -26,5 +26,6 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
 	r.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
+	r.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":5000", r))
 }
