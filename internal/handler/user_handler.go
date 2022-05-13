@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -15,7 +16,7 @@ type UserService interface {
 	GetUsers(page int64, limit int64) ([]*model.User, error)
 	CreateUser(u model.User) (int64, error)
 	DeleteUser(userID int64) (int64, error)
-	UpdateUser(user *model.User) (*model.User, error)
+	UpdateUser(userID int64, user model.User) (*model.User, error)
 }
 
 type UserHandler struct {
@@ -86,11 +87,15 @@ func (h UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func (h UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	var user *model.User
+	var user model.User
 	err := json.Unmarshal(reqBody, &user)
 	if err != nil {
 		log.Fatalln("could not Unmarshal body request")
 		return
+	}
+	user.Address = sql.NullString{
+		String: "Thai Binh",
+		Valid:  true,
 	}
 	vars := mux.Vars(r)
 	userId := vars["id"]
@@ -102,7 +107,7 @@ func (h UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	user.ID = int(userID)
 	fmt.Println(user)
 
-	updateID, err := h.userService.UpdateUser(user)
+	updateID, err := h.userService.UpdateUser(userID, user)
 	if err != nil {
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"error": err.Error(),
